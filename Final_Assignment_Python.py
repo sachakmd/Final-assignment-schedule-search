@@ -14,6 +14,8 @@ from functools import lru_cache
 NUM_RUNS = 1000
 ARRAY_SIZE = 500000
 
+# Task set given in the subject.
+# "jobs" is the number of releases over one hyperperiod.
 tasks = [
     {"id": 1, "C": 1, "T": 10, "D": 10, "jobs": 8},
     {"id": 2, "C": 3, "T": 10, "D": 10, "jobs": 8},
@@ -34,7 +36,9 @@ def random_large_number():
 def measure_tau1():
     execution_times = []
     result = 0
-
+    
+    # This part measures the execution time of tau_1 many times
+    # in order to get Min, Q1, Q2, Q3, Max and WCET.
     for _ in range(NUM_RUNS):
         x = random_large_number()
         y = random_large_number()
@@ -88,7 +92,9 @@ def print_job_release_list():
     print("Idx\tTask\tJob\tRelease\tExec\tDeadline")
 
     jobs = []
-
+    
+    # Here we generate all jobs over one hyperperiod
+    # and sort them by release time for a clearer display.
     for t in tasks:
         for j in range(t["jobs"]):
             release = j * t["T"]
@@ -129,6 +135,9 @@ def next_release_after_now(counts, now):
 
 
 def solve_optimal(allow_tau5_miss=False):
+    # This is the main search part of the project.
+    # Dynamic programming is used to explore all feasible choices
+    # while keeping the one with minimum total waiting time.
     @lru_cache(maxsize=None)
     def dp(counts, now):
         if all_done(counts):
@@ -188,7 +197,9 @@ def solve_optimal(allow_tau5_miss=False):
 def summarize_schedule(title, plan, allow_tau5_miss=False):
     exec_jobs = [x for x in plan if "task_id" in x]
     idle_slots = [x for x in plan if "idle_from" in x]
-
+    
+    # Once the plan is found, this part computes the final values
+    # such as total waiting time, idle time and deadline misses.
     total_waiting = sum(j["waiting"] for j in exec_jobs)
     busy_time = sum(j["finish"] - j["start"] for j in exec_jobs)
     hyperperiod = compute_hyperperiod()
@@ -221,7 +232,9 @@ def summarize_schedule(title, plan, allow_tau5_miss=False):
 
 def main():
     random.seed()
-
+    # Main program:
+    # measure tau_1, print the task information,
+    # then solve the two scheduling cases asked in the subject.
     hyperperiod = compute_hyperperiod()
 
     measure_tau1()
